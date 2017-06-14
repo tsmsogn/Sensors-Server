@@ -1,6 +1,11 @@
 <?php
-
 require('../vendor/autoload.php');
+
+define('FILE_PARAMETER', getenv('FILE_PARAMETER') ?: 'file');
+define('UPLOAD_DIR', __DIR__ . '/uploads');
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 $app = new Silex\Application();
 $app['debug'] = true;
@@ -12,14 +17,23 @@ $app->register(new Silex\Provider\MonologServiceProvider(), array(
 
 // Register view rendering
 $app->register(new Silex\Provider\TwigServiceProvider(), array(
-    'twig.path' => __DIR__.'/views',
+  'twig.path' => __DIR__ . '/views',
 ));
 
 // Our web handlers
 
-$app->get('/', function() use($app) {
-  $app['monolog']->addDebug('logging output.');
-  return $app['twig']->render('index.twig');
+$app->post('files/upload', function (Request $request) use ($app) {
+  $file = $request->files->get(FILE_PARAMETER);
+  $filename = $file->getClientOriginalName();
+
+  if ($file->move(UPLOAD_DIR, $filename)) {
+    exit;
+  }
+
+  // 500
+  $response = new Response();
+  $response->setStatusCode(500);
+  return $response;
 });
 
 $app->run();
