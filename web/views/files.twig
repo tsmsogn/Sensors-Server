@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+  <ul>
+  {% for file in finder %}
+    <li><a href="./fetch/{{ file.getRelativePathname }}">{{ file.getRelativePathname }}</a></li>
+  {% endfor %}
+  </ul>
+</div>
+
+{% endblock %}
